@@ -21,14 +21,15 @@ create table addresses (
 	street varchar(128) not null,
 	house varchar(128) not null,
 	postal_code varchar(128) not null
+	unique(country, province, city, street, house)
 )
 
 create table providers (
 	provider_id int identity(1, 1) primary key,
 	address_id int not null,
-	company_name varchar(128) not null,
-	email varchar(64) not null,
-	phone_number varchar(16) not null
+	company_name varchar(128) not null unique,
+	email varchar(64) not null unique,
+	phone_number varchar(16) not null unique
 
 	constraint FK_provider_address foreign key (address_id) references addresses(address_id)
 	on delete cascade
@@ -38,7 +39,7 @@ create table providers (
 
 create table products (
 	product_id int identity(1, 1) primary key,
-	vendor_code varchar(128) not null,
+	vendor_code varchar(128) not null unique,
 	name varchar(128) not null,
 	category_id int not null,
 	provider_cost money not null,
@@ -58,7 +59,7 @@ create table products (
 create table car_models (
 	model_id int identity(1, 1) primary key,
 	provider_id int,
-	model_name varchar(64) not null,
+	model_name varchar(64) not null unique,
 	carcass_type varchar(64) not null,
 	horse_powers int not null,
 	price money not null, 
@@ -85,8 +86,8 @@ create table clients (
 	client_id int identity(1, 1) primary key,
 	name varchar(32) not null,
 	surname varchar(32) not null,
-	email varchar(128) not null,
-	phone_number varchar(16) not null,
+	email varchar(128) not null unique,
+	phone_number varchar(16) not null unique,
 	address_id int default null,
 	gender varchar(128) default null,
 	birth_date date default null
@@ -100,7 +101,8 @@ create table purchases (
 	purchase_id int identity(1, 1) primary key,
 	total_cost money not null,
 	client_id int,
-	employee_id int
+	employee_id int,
+	purchase_date date default getdate()
 
 	constraint FK_purchase_client foreign key (client_id) references clients(client_id)
 	on delete cascade

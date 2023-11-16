@@ -6,9 +6,9 @@ from datetime import date
 import random
 
 
-EMPLOYEES = 10000 
-CLIENTS = 10000
-PROVIDERS = 10000
+EMPLOYEES = 10 
+CLIENTS = 10
+PROVIDERS = 10
 
 
 fake = Faker()
