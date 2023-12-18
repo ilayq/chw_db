@@ -32,26 +32,29 @@ def generate_deliveries():
         for _ in range(DELIVERIES):
             purch_id = random.choice(all_purch)
             del_date = datetime.strptime(str(fake.date()), "%Y-%m-%d").date()
+            q = text('select total_weight from purchases where purchase_id = :p_id').bindparams(p_id=purch_id)
+            weight = s.execute(q).first()[0]
             if del_date < cur_date:
                 status = 'delivered'
             else:
                 status = 'in delivery'
-            delivery_type = random.choice(['car', 'ship', 'airplane', 'pickup'])
-            if delivery_type == 'pickup':
-                delivery_cost = 0
-            else:
-                delivery_cost = random.randrange(100, 10000)
+            q = text("select destination_type_id from destination_types")
+            types = []
+            for t in s.execute(q):
+                types.extend(t)
+            dest_type_id = random.choice(types)
+            q = text('select weight_coefficient_id from weight_coefficients where lower_threshold<= :w and :w <upper_threshold').bindparams(w=weight)
+            w_coef = s.execute(q).first()[0]
+            q = text('select method_id from delivery_methods')
+            meths = []
+            for m in s.execute(q):
+                meths.extend(m)
+            del_meth = random.choice(meths)
 
-            #create address
-            q = text('select clients.address_id from purchases\
-                    join clients\
-                    on purchases.client_id = clients.client_id\
-                    where purchases.purchase_id = :purch_id').bindparams(purch_id=purch_id)
-            address_id = s.execute(q).all()[0][0]
-            q = text('insert into deliveries(purchase_id, address_id, delivery_date, status, delivery_type, delivery_cost) values\
-                     (:purch_id, :address_id, :delivery_date, :status, :delivery_type, :delivery_cost)').\
-                    bindparams(purch_id=purch_id, address_id=address_id, delivery_date=str(del_date),
-                                status=status, delivery_type=delivery_type, delivery_cost=delivery_cost)
+            q = text('insert into deliveries(purchase_id, delivery_date, status, destination_type_id, delivery_method_id) values\
+                     (:purch_id, :delivery_date, :status, :dest_type_id, :del_meth)').\
+                    bindparams(purch_id=purch_id, delivery_date=str(del_date),
+                                status=status, dest_type_id=dest_type_id, del_meth=del_meth)
             s.execute(q)
         s.commit()
     # address = {

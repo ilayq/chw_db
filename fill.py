@@ -16,12 +16,22 @@ engine = create_engine(connection_url)
 if __name__ == '__main__':
     generate_base_tables()
     generate_products()
-    generate_purchases_and_productsales()
-
     with open('cars.sql') as f:
         with engine.connect() as s:
             s.execute(text(f.read()))
             s.commit()
-
+    with open('coef.sql') as f:
+        with engine.connect() as s:
+            s.execute(text(f.read()))
+            s.commit()
+    with open('del_methods.sql') as f:
+        with engine.connect() as s:
+            s.execute(text(f.read()))
+            s.commit()
+    with open('dest_types.sql') as f:
+        with engine.connect() as s:
+            s.execute(text(f.read()))
+            s.commit()
+    generate_purchases_and_productsales()
     generate_car_details()
     generate_deliveries()

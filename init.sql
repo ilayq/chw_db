@@ -42,6 +42,7 @@ create table products (
 	vendor_code varchar(128) not null unique,
 	name varchar(128) not null,
 	category_id int not null,
+	weight float default 0,
 	provider_cost money not null,
 	list_price money not null,
 	description varchar(1024) default null,
@@ -62,6 +63,7 @@ create table car_models (
 	model_name varchar(64) not null unique,
 	carcass_type varchar(64) not null,
 	horse_powers int not null,
+	weight float not null,
 	price money not null, 
 
 	constraint FK_car_model_provider foreign key (provider_id) references providers(provider_id)
@@ -100,6 +102,7 @@ create table clients (
 create table purchases (
 	purchase_id int identity(1, 1) primary key,
 	total_cost money not null,
+	total_weight float default 0,
 	client_id int,
 	employee_id int,
 	purchase_date date default getdate()
@@ -117,6 +120,7 @@ create table product_sales (
 	product_id int,
 	amount int not null,
 
+	primary key(purchase_id, product_id),
 	constraint FK_sale_purchase foreign key (purchase_id) references purchases(purchase_id)
 	on delete cascade
 	on update cascade,
@@ -125,19 +129,69 @@ create table product_sales (
 	on update no action
 )
 
+create table car_sales (
+	purchase_id int,
+	model_id int,
+	amount int not null,
+
+	primary key(purchase_id, model_id),
+	constraint FK_carsale_purchase foreign key (purchase_id) references purchases(purchase_id)
+	on delete cascade
+	on update cascade,
+	constraint FK_sale_car foreign key (model_id) references car_models(model_id)
+	on delete no action
+	on update no action
+)
+
+create table delivery_methods (
+	method_id int identity(1, 1) primary key,
+	coefficient float not null,
+	description varchar(100) not null
+)
+
+/* another country, another region, another city, in city, pickup */
+create table destination_types (
+	destination_type_id int identity(1, 1) primary key,
+	cost money not null default 0,
+	description varchar(100) not null
+)
+
+create table weight_coefficients (
+	weight_coefficient_id int identity(1, 1) primary key, 
+	lower_threshold float not null,
+	upper_threshold float not null,
+	coefficient float not null
+)
+
+
 create table deliveries (
 	delivery_id int identity(1, 1) primary key,
 	purchase_id int,
-	address_id int default null,
 	delivery_date date not null,
 	status varchar(16) not null,
-	delivery_type varchar(64) not null default 'pickup',
-	delivery_cost money not null default 0
+	destination_type_id int,
+	delivery_method_id int,
+	weight_coefficient_id int default null,
+	cost money default null
 
-	constraint FK_delivery_purchase foreign key (purchase_id) references purchases(purchase_id)
+	constraint FK_delivery_weight_coef_id foreign key (weight_coefficient_id) references weight_coefficients(weight_coefficient_id)
 	on delete cascade
 	on update cascade,
-	constraint FK_delivery_address foreign key (address_id) references addresses(address_id)
+	constraint FK_delivery_dest_type foreign key (destination_type_id) references destination_types(destination_type_id)
+	on delete cascade
+	on update cascade,
+	constraint FK_delivery_method foreign key (delivery_method_id) references delivery_methods(method_id)
 	on delete no action
-	on update no action
+	on update no action,
+	constraint FK_delivery_purchase foreign key (purchase_id) references purchases(purchase_id)
+	on delete cascade
+	on update cascade
+)
+
+create table to_order (
+	--(product_id, vendor_code, provider_id, provider_cost, email, phone_number)
+	product_id int references products(product_id),
+	vendor_code varchar(128) not null,
+	provider_id int references providers(provider_id),
+	provider_cost money not null,
 )

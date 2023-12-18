@@ -1,0 +1,1 @@
+create index full_name on clients(name, surname)

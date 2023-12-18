@@ -133,7 +133,6 @@ def generate_base_tables():
             ('{cli.name}', '{cli.surname}', '{cli.email}', '{cli.phone_number}', '{address_id}', '{cli.gender}', '{str(cli.birth_date)}')''')
             sess.execute(q)
             sess.commit()
-
         for emp in employees:
             q = text(f'''insert into employees(name, surname, birth_date, phone_number, salary, job) values
                      ('{emp.name}', '{emp.surname}', '{str(emp.birth_date)}', '{emp.phone_number}', '{emp.salary}', '{emp.job}')''')

@@ -39,14 +39,15 @@ def generate_products():
             vendor_code = fake.ean13()
             name = fake.word()
             provider_cost = random.randrange(100000) / 3
+            weight = random.randrange(300) / 3
             list_price = random.randrange(3 * int(provider_cost), 6 * int(provider_cost)) / 3
             description = ' '.join(fake.words(nb=20))
             amount_left = random.randrange(5, 15)
 
-            q = text(f'''insert into products(vendor_code, name, category_id, provider_cost, list_price, description, provider_id, amount_left) values\
-                    (:vendor_code, :name, :category_id, :provider_cost, :list_price, :description, :provider_id, :amount_left)''').\
+            q = text(f'''insert into products(vendor_code, name, category_id, weight, provider_cost, list_price, description, provider_id, amount_left) values\
+                    (:vendor_code, :name, :category_id, :weight, :provider_cost, :list_price, :description, :provider_id, :amount_left)''').\
                     bindparams(vendor_code=vendor_code, category_id=category, name=name, provider_cost=provider_cost, list_price=list_price, description=description,
-                    amount_left=amount_left, provider_id=provider)
+                    amount_left=amount_left, provider_id=provider, weight=weight)
             s.execute(q)
         s.commit()
 
